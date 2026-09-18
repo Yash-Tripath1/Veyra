@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#07070d" />
     <meta
       name="description"
-      content="Veyra : see your text as a cryptographic aura."
+      content="Veyra:see your text as a cryptographic aura."
     />
     <title>Veyra</title>
     <link
@@ -522,6 +522,14 @@
         color: #aaa5b8;
         font-weight: 600;
       }
+      .footer a {
+        color: #aaa5b8;
+        text-decoration: none;
+        transition: color 0.2s ease;
+      }
+      .footer a:hover {
+        color: #eee8ff;
+      }
       .toast {
         position: fixed;
         left: 50%;
@@ -609,7 +617,7 @@
         <h1>Your Cryptographic Aura</h1>
         <p class="sub">
           SHA-256 is the algorithm that secures Bitcoin.<br />This is what it
-          looks like, an alien fingerprint made from pure math.
+          looks like — an alien fingerprint made from pure math.
         </p>
         <div class="stage">
           <canvas
@@ -771,7 +779,15 @@
     </main>
     <footer class="footer wrap">
       <span><strong>VEYRA</strong> · cryptographic aura generator</span
-      ><span>SHA-256 · canvas · browser-native</span>
+      ><span class="footer-meta"
+        >SHA-256 · canvas · browser-native ·
+        <a
+          href="https://github.com/Yash-Tripath1"
+          target="_blank"
+          rel="noopener noreferrer"
+          >GitHub ↗</a
+        >
+      </span>
     </footer>
     <div class="toast" id="toast">link copied ✓</div>
     <script>
@@ -1322,5 +1338,5 @@
       requestAnimationFrame(frame);
       window.addEventListener("resize", resize);
     </script>
-  <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3d4187eaa75b7d1',t:'MTc4OTc3Mzc3Nw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+  <script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a3d430ed1f1722a8',t:'MTc4OTc3NDc3OA=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
