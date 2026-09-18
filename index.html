@@ -39,7 +39,8 @@
 <div class="toast" id="toast">link copied ✓</div>
 <script>
 const canvas=document.getElementById('aura'),ctx=canvas.getContext('2d'),input=document.getElementById('text'),hashEl=document.getElementById('hash'),toast=document.getElementById('toast');
-let target=null,current=null,previous=null,transition=1,started=performance.now(),lastHash='',patternMode='mandala',pointer=null;
+let target=null,current=null,previous=null,transition=1,started=performance.now(),lastHash='',patternMode='mandala',pointer=null,lastFrame=0;
+const frameInterval=matchMedia('(max-width:760px)').matches?1000/30:1000/45;
 const TAU=Math.PI*2, quality=matchMedia('(max-width:760px)').matches?.72:1, clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 function hex(bytes){return [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function hue(h,s=80,l=65){return `hsl(${h},${s}%,${l}%)`}
@@ -82,7 +83,7 @@ function drawAura(p,time,alpha){
      else {const radial=R*(.08+q*.82)+fx*R*wobble*.16;const ang=base+fy*.45+Math.sin(u*1.7+phase)*.18+q*q*p.drift;x=Math.cos(ang)*radial+Math.sin(u*2.7+phase)*R*.08;y=Math.sin(ang)*radial+fy*R*.15;}
      j?ctx.lineTo(x,y):ctx.moveTo(x,y);
    }
-   const hueNow=(p.h1+s*13+p.h2*.12)%360;ctx.strokeStyle=`hsla(${hueNow},${68+rnd()*26}%,${63+rnd()*20}%,${.10+rnd()*.22})`;ctx.lineWidth=.45+rnd()*1.25;ctx.shadowBlur=p.glow*(.35+rnd()*.45);ctx.shadowColor=hue(hueNow,90,68);ctx.stroke();
+   const hueNow=(p.h1+s*13+p.h2*.12)%360;ctx.strokeStyle=`hsla(${hueNow},${68+rnd()*26}%,${63+rnd()*20}%,${.10+rnd()*.22})`;ctx.lineWidth=.45+rnd()*1.25;ctx.shadowBlur=0;ctx.stroke();
  }
  // A second, finer Fourier contour gives the aura its almost biological edge.
  ctx.globalCompositeOperation='lighter';
@@ -92,16 +93,16 @@ function drawAura(p,time,alpha){
    ctx.strokeStyle=`hsla(${(p.h2+s*19)%360},90%,75%,${.06+rnd()*.12})`;ctx.lineWidth=.35+rnd()*.7;ctx.stroke();
  }
  // Concentric rings are intentionally eccentric: they breathe and drift instead of becoming a target.
- ctx.globalCompositeOperation='source-over';ctx.shadowBlur=p.glow*.55;
+ ctx.globalCompositeOperation='source-over';ctx.shadowBlur=0;
  for(let i=0;i<p.rings;i++){const rr=R*(.17+i*.073),off=Math.sin(t*.00045+i)*.012;ctx.globalAlpha=alpha*p.opacity*(1-i/p.rings)*.55;ctx.strokeStyle=hue((p.h2+i*17)%360,72,70);ctx.lineWidth=.45+(i%2)*.35;ctx.beginPath();for(let j=0;j<=96;j++){const a=j/96*TAU, wob=rr*(1+off*Math.sin(a*(3+i%4)+p.rot));const x=Math.cos(a)*wob,y=Math.sin(a)*wob; j?ctx.lineTo(x,y):ctx.moveTo(x,y)}ctx.stroke()}
  // Particles sample the same trajectories, so they feel like matter in the field.
- ctx.globalAlpha=alpha;ctx.shadowBlur=p.glow*.8;for(let i=0;i<p.arms*p.density;i++){const strand=i%strands,q=rnd(),u=q*TAU*1.04,h1=p.harmonics[strand%5],ang=strand/strands*TAU+Math.sin(u*1.4+h1.phase)*.26+q*q*p.drift*.7,rad=R*(.10+q*.73)+Math.sin(u*h1.x+h1.phase)*R*.04;ctx.save();ctx.translate(Math.cos(ang)*rad,Math.sin(ang)*rad);const size=.65+rnd()*1.65+Math.sin(t*.002+i)*.35;ctx.fillStyle=i%4?`hsla(${p.h2+strand*11},90%,78%,${.22+rnd()*.62})`:`hsla(${p.h1},92%,82%,.75)`;ctx.beginPath();ctx.arc(0,0,size,0,TAU);ctx.fill();ctx.restore()}
+ ctx.globalAlpha=alpha;ctx.shadowBlur=0;for(let i=0;i<p.arms*p.density;i++){const strand=i%strands,q=rnd(),u=q*TAU*1.04,h1=p.harmonics[strand%5],ang=strand/strands*TAU+Math.sin(u*1.4+h1.phase)*.26+q*q*p.drift*.7,rad=R*(.10+q*.73)+Math.sin(u*h1.x+h1.phase)*R*.04;ctx.save();ctx.translate(Math.cos(ang)*rad,Math.sin(ang)*rad);const size=.65+rnd()*1.65+Math.sin(t*.002+i)*.35;ctx.fillStyle=i%4?`hsla(${p.h2+strand*11},90%,78%,${.22+rnd()*.62})`:`hsla(${p.h1},92%,82%,.75)`;ctx.beginPath();ctx.arc(0,0,size,0,TAU);ctx.fill();ctx.restore()}
  // Cursor glimmer: a local lens reveals the nearby field without changing it.
  if(pointer){const dx=pointer.x-cx,dy=pointer.y-cy,co=Math.cos(-spin),si=Math.sin(-spin),mx=(dx*co-dy*si)/breath,my=(dx*si+dy*co)/breath,dist=Math.hypot(mx,my);if(dist<R*1.25){const lens=ctx.createRadialGradient(mx,my,0,mx,my,R*.46);lens.addColorStop(0,`hsla(${p.h2},100%,82%,.12)`);lens.addColorStop(.28,`hsla(${p.h1},100%,68%,.07)`);lens.addColorStop(1,'transparent');ctx.globalAlpha=alpha;ctx.fillStyle=lens;ctx.beginPath();ctx.arc(mx,my,R*.48,0,TAU);ctx.fill();}}
  // A quiet central singularity anchors the otherwise non-symmetric system.
- ctx.shadowBlur=p.glow*1.4;ctx.fillStyle=hue(p.h1,90,82);ctx.globalAlpha=alpha*.52;ctx.beginPath();ctx.arc(0,0,1.7+Math.sin(t*.002)*.7,0,TAU);ctx.fill();ctx.restore();
+ ctx.shadowBlur=0;ctx.fillStyle=hue(p.h1,90,82);ctx.globalAlpha=alpha*.52;ctx.beginPath();ctx.arc(0,0,1.7+Math.sin(t*.002)*.7,0,TAU);ctx.fill();ctx.restore();
 }
-function frame(now){resize();ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);if(current&&target&&transition<1)transition=clamp(transition+.018,0,1);if(previous&&transition<1)drawAura(previous,now,1-transition);drawAura(target&&current?mix(current,target,transition):target,now,1);if(current&&target&&transition>=1){current=target;previous=null}requestAnimationFrame(frame)}
+function frame(now){requestAnimationFrame(frame);if(now-lastFrame<frameInterval)return;lastFrame=now;resize();ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);if(current&&target&&transition<1)transition=clamp(transition+.018,0,1);if(previous&&transition<1)drawAura(previous,now,1-transition);drawAura(target&&current?mix(current,target,transition):target,now,1);if(current&&target&&transition>=1){current=target;previous=null}requestAnimationFrame(frame)}
 async function update(){const val=input.value;const p=await digest(val);if(p.hex===lastHash)return;lastHash=p.hex;hashEl.textContent='sha-256 · '+p.hex;document.getElementById('field').textContent=p.field;document.getElementById('harmonics').textContent=p.harmonics.map(h=>h.x+'×'+h.y).join(' ');document.getElementById('drift').textContent=(p.drift>=0?'+':'')+p.drift.toFixed(2);setAura(p)}
 function b64(s){return btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
 function from64(s){s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';return new TextDecoder().decode(Uint8Array.from(atob(s),c=>c.charCodeAt(0)))}
